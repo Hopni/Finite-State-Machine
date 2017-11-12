@@ -4,9 +4,13 @@ class FSM {
      * @param config
      */
     constructor(config) {
+        if(arguments.length === 0){
+            return Error;
+        } else {
         this.state = config.initial;
         this.previousStates = [];
         this.count = 0;
+        }
     }
 
     /**
@@ -23,7 +27,7 @@ class FSM {
      */
     changeState(state) {
         if(state === 'normal' || state === 'busy' || state === 'sleeping' || state === 'hungry'){
-             this.previousStates.push(this.state);
+             this.previousStates[this.count] = this.state;
              this.count++;
             this.state = state;
         } else {
@@ -38,41 +42,41 @@ class FSM {
     trigger(event) {
         switch(event){
            case 'study' : if(this.getState() === 'normal'){
-                this.previousStates.push(this.state);
+               // this.previousStates.push(this.state);
                this.changeState('busy');
            } else {
-               throw Error;
+               return Error;
            }
            break;
            case 'get_tired' : if(this.getState() === 'busy'){
-             this.previousStates.push(this.state);
+            // this.previousStates.push(this.state);
            this.changeState('sleeping'); 
            } else {
-               throw Error;
+               return Error;
            }
            break;
            case 'get_hungry' : if((this.getState() === 'busy') || (this.getState() === 'sleeping')){
-             this.previousStates.push(this.state);
+             //this.previousStates.push(this.state);
            this.changeState('hungry'); 
            } else {
-               throw Error;
+               return Error;
            }
            break;
            case 'eat' : if(this.getState() === 'hungry'){
-             this.previousStates.push(this.state);
+            // this.previousStates.push(this.state);
             this.changeState('normal'); 
            } else {
-               throw Error;
+               return Error;
            }
            break;
            case 'get_up' : if(this.getState() === 'sleeping'){
-             this.previousStates.push(this.state);
+            // this.previousStates.push(this.state);
            this.changeState('normal'); 
            } else {
-               throw Error;
+               return Error;
            }
            break;
-           default: throw Error;
+           default: return Error;
         }
     }
 
@@ -80,8 +84,9 @@ class FSM {
      * Resets FSM state to initial.
      */
     reset() {
-         this.previousStates.push(this.state);
+        this.previousStates = [];
         this.state = 'normal';
+        this.count = 0;
     }
 
     /**
@@ -105,7 +110,7 @@ class FSM {
             default: if(arguments.length === 0){
                 return ['normal', 'busy', 'hungry', 'sleeping'];
             } else {
-                throw Error;
+                return Error;
             }
         }
     }
@@ -116,9 +121,10 @@ class FSM {
      * @returns {Boolean}
      */
     undo() {
-        if(this.previousStates.length !== 0){
-            count--;
-            this.state = this.previousStates[count];
+        this.previousStates[this.count] = this.state;
+        if(!(this.count === 0) && !(this.previousStates.length === 0)){
+            this.state = this.previousStates[--this.count];
+            //this.count--;
             return true;
         } else {
             return false;
@@ -131,11 +137,12 @@ class FSM {
      * @returns {Boolean}
      */
     redo() {
-        if(this.previousStates.length <=  count){
+        if(this.previousStates.length <= this.count+1 || this.previousStates.length === 0){
             return false;
         } else {
-        count++;
-        this.state = this.previousStates[count];
+        this.count++;
+        this.state = this.previousStates[this.count];
+        return true;
         }
     }
 
@@ -143,7 +150,7 @@ class FSM {
      * Clears transition history
      */
     clearHistory() {
-        this.previousStates.clear();
+        this.previousStates = [];
         this.count = 0;
     }
 }
@@ -151,3 +158,136 @@ class FSM {
 //module.exports = FSM;
 
 /** @Created by Uladzimir Halushka **/
+var config = {
+    initial: 'normal',
+    states: {
+        normal: {
+            transitions: {
+                study: 'busy',
+            }
+        },
+        busy: {
+            transitions: {
+                get_tired: 'sleeping',
+                get_hungry: 'hungry',
+            }
+        },
+        hungry: {
+            transitions: {
+                eat: 'normal'
+            },
+        },
+        sleeping: {
+            transitions: {
+                get_hungry: 'hungry',
+                get_up: 'normal',
+            },
+        },
+    }
+};
+    
+    
+        
+            var student = new FSM(config);
+
+            student.trigger('study');
+            student.undo();
+            console.log(student.undo()===false);
+        
+
+    
+
+
+
+            var student = new FSM(config);
+
+            console.log(student.redo()===false);
+
+
+
+            var student = new FSM(config);
+
+            student.trigger('study');
+            student.undo();
+            student.redo();
+            console.log(student.getState()==='busy');
+
+            student.trigger('get_tired');
+            student.trigger('get_hungry');
+
+            student.undo();
+            student.undo();
+
+            student.redo();
+            student.redo();
+
+            console.log(student.getState()==='hungry');
+  
+
+  
+            var student = new FSM(config);
+
+            student.trigger('study');
+            student.undo();
+            console.log(student.redo()===true);
+  
+
+  
+            var student = new FSM(config);
+
+            student.trigger('study');
+            student.undo();
+            student.redo();
+            console.log(student.redo()===false);
+  
+
+
+            var student = new FSM(config);
+
+            student.trigger('study');
+            student.undo();
+            student.redo();
+            student.undo();
+            student.redo();
+            student.undo();
+            student.redo();
+            student.undo();
+            student.redo();
+            student.undo();
+            student.redo();
+
+            console.log(student.getState()==='busy');
+
+      
+
+            var student = new FSM(config);
+
+            student.trigger('study');
+            student.undo();
+            student.trigger('study');
+            student.undo();
+            student.trigger('study');
+            student.redo();
+
+            console.log(student.redo()===false);
+     
+
+           var student = new FSM(config);
+
+            student.changeState('hungry');
+            student.undo();
+            student.changeState('normal');
+            student.undo();
+            student.changeState('busy');
+            student.redo();
+
+            console.log(student.redo()===false);
+    
+        var student = new FSM(config);
+
+            student.trigger('study');
+            student.trigger('get_hungry');
+            student.clearHistory();
+
+            console.log(student.undo()===false);
+            console.log(student.redo()===false);
