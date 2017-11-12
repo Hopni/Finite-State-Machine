@@ -4,9 +4,9 @@ class FSM {
      * @param config
      */
     constructor(config) {
-        state: config.initial;
-        previousStates: [];
-        count: 0;
+        this.state = config.initial;
+        this.previousStates = [];
+        this.count = 0;
     }
 
     /**
