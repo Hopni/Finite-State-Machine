@@ -5,7 +5,7 @@ class FSM {
      */
     constructor(config) {
         if(arguments.length === 0){
-            return Error;
+            throw new Error();
         } else {
         this.state = config.initial;
         this.previousStates = [];
@@ -31,7 +31,7 @@ class FSM {
              this.count++;
             this.state = state;
         } else {
-            return Error;
+            throw new Error();
         }
     }
 
@@ -45,38 +45,38 @@ class FSM {
                // this.previousStates.push(this.state);
                this.changeState('busy');
            } else {
-               return Error;
+              throw new Error();
            }
            break;
            case 'get_tired' : if(this.getState() === 'busy'){
             // this.previousStates.push(this.state);
            this.changeState('sleeping'); 
            } else {
-               return Error;
+              throw new Error();
            }
            break;
            case 'get_hungry' : if((this.getState() === 'busy') || (this.getState() === 'sleeping')){
              //this.previousStates.push(this.state);
            this.changeState('hungry'); 
            } else {
-               return Error;
+              throw new Error();
            }
            break;
            case 'eat' : if(this.getState() === 'hungry'){
             // this.previousStates.push(this.state);
             this.changeState('normal'); 
            } else {
-               return Error;
+              throw new Error();
            }
            break;
            case 'get_up' : if(this.getState() === 'sleeping'){
             // this.previousStates.push(this.state);
            this.changeState('normal'); 
            } else {
-               return Error;
+              throw new Error();
            }
            break;
-           default: return Error;
+           default:throw new Error();
         }
     }
 
@@ -110,7 +110,7 @@ class FSM {
             default: if(arguments.length === 0){
                 return ['normal', 'busy', 'hungry', 'sleeping'];
             } else {
-                return Error;
+               return [];
             }
         }
     }
@@ -158,6 +158,3 @@ class FSM {
 module.exports = FSM;
 
 /** @Created by Uladzimir Halushka **/
-
-      
-          
